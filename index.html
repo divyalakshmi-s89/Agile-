@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expense Tracker </title>
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+body{
+    font-family:Arial,sans-serif;
+    background:#f4f6f8;
+    color:#333;
+}
+header{
+    background:#db49b9;
+    color:white;
+    text-align:center;
+    padding:25px;
+}
+header h1{
+    margin-bottom:8px;
+}
+.container{
+    width:90%;
+    max-width:800px;
+    margin:30px auto;
+}
+.form-box,.summary,.expense-box{
+    background:white;
+    padding:22px;
+    margin-bottom:20px;
+    border-radius:10px;
+    box-shadow:0 3px 10px #ccc;
+}
+h2{
+    color:#1565c0;
+    margin-bottom:15px;
+}
+.form{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+}
+input,select{
+    padding:11px;
+    border:1px solid #bbb;
+    border-radius:5px;
+}
+.add-btn{
+    grid-column:1/3;
+    padding:12px;
+    background:#1565c0;
+    color:white;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+}
+.add-btn:hover{
+    background:#0d47a1;
+}
+.summary{
+    display:flex;
+    justify-content:space-around;
+    text-align:center;
+}
+.summary div{
+    padding:10px;
+}
+.amount{
+    font-size:24px;
+    font-weight:bold;
+    color:#1565c0;
+}
+.expense{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:14px;
+    margin:10px 0;
+    background:#f5f7fa;
+    border-left:5px solid #1565c0;
+    border-radius:5px;
+}
+.expense h3{
+    margin-bottom:5px;
+}
+.delete{
+    background:#d32f2f;
+    color:white;
+    border:none;
+    padding:8px 12px;
+    border-radius:5px;
+    cursor:pointer;
+}
+.delete:hover{
+    background:#b71c1c;
+}
+.status{
+    text-align:center;
+    padding:13px;
+    background:#e8f5e9;
+    color:#2e7d32;
+    border-radius:5px;
+}
+footer{
+    background:#1565c0;
+    color:white;
+    text-align:center;
+    padding:18px;
+    margin-top:30px;
+}
+@media(max-width:600px){
+    .form{
+        grid-template-columns:1fr;
+    }
+    .add-btn{
+        grid-column:1;
+    }
+    .summary{
+        flex-direction:column;
+        gap:10px;
+    }
+}
+</style>
+</head>
+<body>
+<header>
+    <h1>Smart Expense Tracker</h1>
+    <p>Expense Management </p>
+</header>
+<div class="container">
+    <div class="form-box">
+        <h2>Add Expense</h2>
+        <div class="form">
+            <input type="text"
+                   id="title"
+                   placeholder="Expense name">
+            <input type="number"
+                   id="amount"
+                   placeholder="Amount">
+            <select id="category">
+                <option value="">Select Category</option>
+                <option>Food</option>
+                <option>Travel</option>
+                <option>Education</option>
+                <option>Shopping</option>
+                <option>Other</option>
+            </select>
+            <input type="date" id="date">
+            <button class="add-btn"
+                    onclick="addExpense()">
+                Add Expense
+            </button>
+        </div>
+    </div>
+    <div class="summary">
+        <div>
+            <h3>Total Expenses</h3>
+            <p class="amount" id="total">₹0</p>
+        </div>
+        <div>
+            <h3>Number of Expenses</h3>
+            <p class="amount" id="count">0</p>
+        </div>
+    </div>
+    <div class="expense-box">
+        <h2>Expense History</h2>
+        <div id="expenseList">
+            <p>No expenses added yet.</p>
+        </div>
+    </div>
+    <div class="status">
+        <strong>Expense Service:</strong>
+        Running Successfully
+    </div>
+</div>
+<footer>
+    <p>
+        © 2026 Smart Expense Tracker 
+    </p>
+</footer>
+<script>
+let expenses = [];
+function addExpense(){
+    let title =
+        document.getElementById("title").value.trim();
+    let amount =
+        Number(document.getElementById("amount").value);
+    let category =
+        document.getElementById("category").value;
+    let date =
+        document.getElementById("date").value;
+    if(title === "" ||
+       amount <= 0 ||
+       category === "" ||
+       date === ""){
+        alert("Please enter all expense details.");
+        return;
+    }
+    let expense = {
+        id: Date.now(),
+        title: title,
+        amount: amount,
+        category: category,
+        date: date
+    };
+    expenses.push(expense);
+    displayExpenses();
+    clearForm();
+}
+function displayExpenses(){
+    let list =
+        document.getElementById("expenseList");
+    list.innerHTML = "";
+    if(expenses.length === 0){
+        list.innerHTML =
+            "<p>No expenses added yet.</p>";
+        updateSummary();
+        return;
+    }
+    expenses.forEach(function(expense){
+        let item =
+            document.createElement("div");
+        item.className = "expense";
+        item.innerHTML =
+            "<div>" +
+            "<h3>" +
+            expense.title +
+            "</h3>" +
+            "<p>Category: " +
+            expense.category +
+            "</p>" +
+            "<p>Date: " +
+            expense.date +
+            "</p>" +
+            "</div>" +
+            "<div>" +
+            "<h3>₹" +
+            expense.amount +
+            "</h3>" +
+            "<button class='delete' " +
+            "onclick='deleteExpense(" +
+            expense.id +
+            ")'>" +
+            "Delete" +
+            "</button>" +
+            "</div>";
+        list.appendChild(item);
+    });
+    updateSummary();
+}
+function deleteExpense(id){
+    expenses =
+        expenses.filter(function(expense){
+            return expense.id !== id;
+        });
+    displayExpenses();
+}
+function updateSummary(){
+    let total = expenses.reduce(
+        function(sum, expense){
+            return sum + expense.amount;
+        },0
+    );
+    document.getElementById("total")
+        .textContent = "₹" + total;
+    document.getElementById("count")
+        .textContent = expenses.length;
+}
+function clearForm(){
+    document.getElementById("title").value = "";
+    document.getElementById("amount").value = "";
+    document.getElementById("category").value = "";
+    document.getElementById("date").value = "";
+}
+</script>
+</body>
+</html>
